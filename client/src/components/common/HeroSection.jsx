@@ -1,0 +1,1 @@
+import hero from "../../assets/images/hero.png";
