@@ -11,7 +11,9 @@ const LandingPage = () => {
           marginTop: "100px",
         }}
       >
-        <h1>AI-powered Farmer Disaster Reporting</h1>
+        <h1 style={{
+            textAlign:"center"
+        }}>AI-powered Farmer Disaster Reporting</h1>
 
         <p>
           Faster Damage Assessment • Faster Government Response
