@@ -136,3 +136,11 @@ AgriRelief AI uses Gemini's multimodal vision features to evaluate crop photos. 
 - **`disasterType`**: Matches with the visual symptoms of flood, drought, pests, hail, etc.
 - **`severityLevel`**: Low, Medium, High, or Critical.
 - **`fraudAlert`**: Flags any irregularities in the uploaded photo (e.g., stock photos, unrelated objects, or mismatched reports).
+## Demo Credentials
+
+| Role    | Route               | ID / Username     | Password      |
+| ------- | ------------------- | ----------------- | ------------- |
+| Farmer  | `/farmer/login`     | register first    | —             |
+| Officer | `/government/login` | `AGR-TG-HYD-0001` | `password123` |
+| Officer | `/government/login` | `AGR-AP-GNT-0005` | `password123` |
+| Admin   | `/admin/login`      | `admin`           | `admin@2026`  |
