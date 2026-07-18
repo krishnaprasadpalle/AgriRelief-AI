@@ -97,6 +97,17 @@ const analyzeHandler = async (req, res, next) => {
       }
     }
 
+    let registeredLocation = null;
+    if (req.body.registeredLocation) {
+      try {
+        registeredLocation = typeof req.body.registeredLocation === "string"
+          ? JSON.parse(req.body.registeredLocation)
+          : req.body.registeredLocation;
+      } catch (e) {
+        console.warn("Failed to parse registeredLocation field as JSON:", req.body.registeredLocation);
+      }
+    }
+
     // 6. Perform Gemini Vision analysis
     console.log(`[AnalysisController] Dispatching analysis for crop ${crop}, damage ${damageType}`);
     const analysisResult = await analyzeImageWithGemini(buffer, mimetype, {
@@ -105,6 +116,7 @@ const analyzeHandler = async (req, res, next) => {
       area,
       gps,
       weather,
+      registeredLocation,
     });
 
     // 7. Return strict standard JSON structure

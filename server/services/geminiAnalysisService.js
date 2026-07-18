@@ -187,8 +187,7 @@ const analyzeCropDamage = async ({ images, crop, damageType, geo, weather }) => 
       return buildStandardResponse(parsed, { crop, damageType, geo });
     } catch (err) {
       console.error("[Gemini] Live API call failed:", err.message);
-      console.log("[Gemini] Falling back to mock response.");
-      // Fall through to mock
+      throw new Error(`AI Analysis failed: ${err.message || "Unknown error occurred"}`);
     }
   }
 

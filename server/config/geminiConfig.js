@@ -15,7 +15,7 @@ const geminiConfig = {
   apiKey: process.env.GEMINI_API_KEYS || "",
 
   // Gemini model to use for vision analysis
-  model: "gemini-2.0-flash",
+  model: "gemini-2.5-flash",
 
   // Whether to use the real Gemini API or return mock data
   // API key is now configured — live mode enabled

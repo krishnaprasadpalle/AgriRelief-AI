@@ -65,6 +65,12 @@ const AIResult = () => {
       area: parseFloat(reportData.area),
       gps: reportData.gps || null,
       weather: reportData.gps?.weather || null,
+      registeredLocation: {
+        latitude: farmer?.farmLatitude || farmer?.latitude || null,
+        longitude: farmer?.farmLongitude || farmer?.longitude || null,
+        district: farmer?.district || "",
+        village: farmer?.village || "",
+      },
     };
 
     analyze(payload);
@@ -137,6 +143,12 @@ const AIResult = () => {
                   area: parseFloat(area),
                   gps: gps || null,
                   weather: gps?.weather || null,
+                  registeredLocation: {
+                    latitude: farmer?.farmLatitude || farmer?.latitude || null,
+                    longitude: farmer?.farmLongitude || farmer?.longitude || null,
+                    district: farmer?.district || "",
+                    village: farmer?.village || "",
+                  },
                 })
               }
               className="w-full bg-green-600 hover:bg-green-700 text-white rounded-xl py-3 font-bold cursor-pointer transition shadow-md"
@@ -178,6 +190,10 @@ const AIResult = () => {
     reason,
     indicators,
     sdrfEligibility,
+    priority,
+    geoAssessment,
+    costEstimation,
+    orchestration,
   } = analysis;
 
   const isInvalidEvidence = isAgricultureField === false;
@@ -229,9 +245,15 @@ const AIResult = () => {
             reason,
             indicators: indicators || null,
             sdrfEligibility: sdrfEligibility || "NOT_ELIGIBLE",
+            priority: priority || "Standard",
+            geoAssessment: geoAssessment || null,
+            costEstimation: costEstimation || null,
+            orchestration: orchestration || null,
           },
           timestamp: new Date().toISOString(),
           severity: severity || "Medium",
+          priority: priority || "Standard",
+          estimatedAmount: costEstimation?.estimatedAmount || 0,
           status: "Submitted",
         };
 
@@ -457,10 +479,49 @@ const AIResult = () => {
                 <div className="bg-red-50/50 border border-red-100 rounded-xl p-3 text-center">
                   <span className="text-gray-400 text-[9px] block font-bold uppercase">Priority</span>
                   <span className="text-red-700 font-extrabold text-sm block mt-0.5">
-                    {severity === "Critical" || severity === "High" ? "Immediate" : "Standard"}
+                    {priority || (severity === "Critical" || severity === "High" ? "Immediate" : "Standard")}
                   </span>
                 </div>
               </div>
+
+              {(costEstimation || geoAssessment) && (
+                <>
+                  <hr className="border-gray-100" />
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {costEstimation && (
+                      <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-4">
+                        <span className="text-[10px] text-emerald-700 uppercase font-bold tracking-wider block mb-1">
+                          Damage & Relief Calculation
+                        </span>
+                        <p className="text-lg font-extrabold text-emerald-800">
+                          Rs. {Number(costEstimation.estimatedAmount || 0).toLocaleString("en-IN")}
+                        </p>
+                        <div className="mt-2 space-y-1 text-[10px] text-emerald-700 font-semibold">
+                          <p>Claimed: {costEstimation.claimedAreaAcres} acres</p>
+                          <p>Damaged: {affectedPercentage}% = {((Number(costEstimation.claimedAreaAcres || 0) * Number(affectedPercentage || 0)) / 100).toFixed(2)} acres</p>
+                          <p>Eligible: {costEstimation.eligibleAreaHectares} ha x Rs. {Number(costEstimation.ratePerHectare || 0).toLocaleString("en-IN")}/ha</p>
+                          <p>Status: {costEstimation.payoutStatus}</p>
+                        </div>
+                      </div>
+                    )}
+                    {geoAssessment && (
+                      <div className="bg-slate-50 border border-slate-100 rounded-xl p-4">
+                        <span className="text-[10px] text-slate-500 uppercase font-bold tracking-wider block mb-1">
+                          Geo Risk
+                        </span>
+                        <p className="text-sm font-extrabold text-slate-800">
+                          {geoAssessment.geoRiskLevel || "LOW"}
+                        </p>
+                        <p className="text-[10px] text-slate-500 mt-1">
+                          {geoAssessment.distanceMeters != null
+                            ? `${geoAssessment.distanceMeters}m from registered farm point`
+                            : geoAssessment.verificationStatus || "Address verification used"}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </>
+              )}
 
               {recommendation && (
                 <>

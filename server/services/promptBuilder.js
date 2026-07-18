@@ -22,7 +22,7 @@
  * @param {object} [metadata.weather] - Weather metadata
  * @returns {string} Prompt string for Gemini
  */
-const buildAnalysisPrompt = ({ crop, damageType, area, gps, weather }) => {
+const buildAnalysisPrompt = ({ crop, damageType, area, gps, weather, registeredLocation }) => {
   return `You are acting as:
 - An Agricultural Crop Damage Assessment Expert
 - A Government Disaster Relief Inspector
@@ -35,7 +35,7 @@ STRICT INSTRUCTIONS:
 4. If the image does not show an agricultural field, set "isAgricultureField": false and set relevant fallback values.
 5. If a crop is present but cannot be identified, set "cropDetected": false and "cropType": "Unknown".
 6. Never invent crop names outside of [Paddy, Cotton, Groundnut, Sugarcane, Maize, Chilli, Unknown].
-7. Never invent damage types. Supported values: [Flood, Drought, Cyclone, Pest, Disease, Healthy Crop, Unknown].
+7. Never invent damage types. Supported values: [Flood, Heavy Rain, Drought, Cyclone, Pest, Disease, Hailstorm, Animal Damage, Healthy Crop, Unknown].
 8. Return JSON ONLY. Do NOT wrap the JSON in markdown code blocks (e.g. do NOT use \`\`\`json). Do NOT write any explanations or text around the JSON.
 
 METADATA FROM FARMER REPORT:
@@ -43,6 +43,7 @@ METADATA FROM FARMER REPORT:
 - Reported Damage Type: ${damageType}
 ${area ? `- Reported Affected Area (Acres): ${area}` : ""}
 ${gps ? `- GPS Coordinates: Lat ${gps.latitude}, Lon ${gps.longitude}` : ""}
+${registeredLocation ? `- Registered Farm Coordinates: Lat ${registeredLocation.latitude}, Lon ${registeredLocation.longitude}` : ""}
 ${weather ? `- Weather: Temp ${weather.temperature}°C, Humidity ${weather.humidity}%, Condition ${weather.description}` : ""}
 
 ANALYSIS STEPS:
@@ -69,7 +70,7 @@ ANALYSIS STEPS:
 }
 3. If it IS an agricultural field:
    a. Detect the crop. Supported crops: Paddy, Cotton, Groundnut, Sugarcane, Maize, Chilli, Unknown.
-   b. Detect damage. Supported damage: Flood, Drought, Cyclone, Pest, Disease, Healthy Crop, Unknown.
+   b. Detect damage. Supported damage: Flood, Heavy Rain, Drought, Cyclone, Pest, Disease, Hailstorm, Animal Damage, Healthy Crop, Unknown.
    c. Check for physical flood / disaster indicators:
       - standingWater (boolean): is there standing water or flooding in the field?
       - siltDeposit (boolean): are leaves/crops coated with mud or silt?
@@ -84,6 +85,7 @@ ANALYSIS STEPS:
    f. Estimate severity: Low, Medium, High, Critical.
    g. Estimate your confidence in this analysis (0-100).
    h. Generate a professional recommendation for relief/remediation (e.g. fungicide spray, drain field, re-sowing).
+   i. Make confidence, severity and affectedPercentage depend on visual evidence. Do not repeat the same values for different images.
 
 STRICT JSON OUTPUT FORMAT (Example for valid image):
 {

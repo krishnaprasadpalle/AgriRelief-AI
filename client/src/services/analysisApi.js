@@ -47,7 +47,7 @@ const base64ToBlob = (base64DataUrl) => {
  * @returns {Promise<object>} Parsed JSON response from backend.
  */
 export const analyzeReport = async (payload, signal) => {
-  const { image, crop, damageType, area, gps, weather } = payload;
+  const { image, crop, damageType, area, gps, weather, registeredLocation } = payload;
 
   const formData = new FormData();
   
@@ -65,6 +65,10 @@ export const analyzeReport = async (payload, signal) => {
   
   if (weather) {
     formData.append("weather", JSON.stringify(weather));
+  }
+
+  if (registeredLocation) {
+    formData.append("registeredLocation", JSON.stringify(registeredLocation));
   }
 
   const response = await fetch(`${API_BASE}/api/analyze`, {

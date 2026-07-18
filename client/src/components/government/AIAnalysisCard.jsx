@@ -98,6 +98,10 @@ const AIAnalysisCard = ({ claim }) => {
   const recommendation = ai.recommendation || "Estimated loss pending field inspection.";
   const reason = ai.reason || null;
   const sdrfEligibility = ai.sdrfEligibility || "ELIGIBLE_MODERATE"; // default fallback for older records
+  const priority = ai.priority || claim.priority || (severity === "Critical" || severity === "High" ? "Immediate" : "Standard");
+  const costEstimation = ai.costEstimation || null;
+  const geoAssessment = ai.geoAssessment || null;
+  const orchestration = ai.orchestration || null;
   const indicators = ai.indicators || {
     standingWater: aiDamageType === "Flood",
     siltDeposit: false,
@@ -138,6 +142,9 @@ const AIAnalysisCard = ({ claim }) => {
               Policy Checked
             </span>
           </div>
+          <p className="text-[11px] text-slate-500 font-medium leading-relaxed mt-2">
+            Use: SDRF threshold decides whether the claim can move to payout. Below 33% damage is not eligible; eligible claims use crop category rate, damaged area, and geo risk to estimate the payable amount.
+          </p>
         </div>
 
         {/* Physical Evidence Indicators (Real-Life Survey Checks) */}
@@ -187,7 +194,7 @@ const AIAnalysisCard = ({ claim }) => {
         </div>
 
         {/* Metrics Grid */}
-        <div className="grid grid-cols-3 gap-2">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
           <div className="bg-slate-50 border border-slate-100 rounded-lg p-2.5 text-center">
             <span className="text-[9px] text-gray-400 block font-bold uppercase">Estimated Damage</span>
             <span className="text-slate-800 font-extrabold text-xs block mt-0.5">
@@ -208,7 +215,64 @@ const AIAnalysisCard = ({ claim }) => {
               {severity}
             </span>
           </div>
+          <div className="bg-slate-50 border border-slate-100 rounded-lg p-2.5 text-center">
+            <span className="text-[9px] text-gray-400 block font-bold uppercase">Priority</span>
+            <span className="text-slate-800 font-extrabold text-xs block mt-0.5 truncate px-1">
+              {priority}
+            </span>
+          </div>
         </div>
+
+        {(costEstimation || geoAssessment) && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            {costEstimation && (
+              <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-3">
+                <span className="text-[10px] text-emerald-700 uppercase font-bold tracking-wider block mb-1">
+                  Damage & Amount Calculation
+                </span>
+                <p className="text-sm text-emerald-800 font-extrabold">
+                  Rs. {Number(costEstimation.estimatedAmount || 0).toLocaleString("en-IN")}
+                </p>
+                <div className="mt-2 space-y-1 text-[10px] text-emerald-700 font-semibold">
+                  <p>Claimed: {costEstimation.claimedAreaAcres} acres</p>
+                  <p>Damaged: {ai.affectedPercentage || 0}% = {((Number(costEstimation.claimedAreaAcres || 0) * Number(ai.affectedPercentage || 0)) / 100).toFixed(2)} acres</p>
+                  <p>Eligible: {costEstimation.eligibleAreaHectares} ha x Rs. {Number(costEstimation.ratePerHectare || 0).toLocaleString("en-IN")}/ha</p>
+                  <p>Status: {costEstimation.payoutStatus}</p>
+                </div>
+              </div>
+            )}
+            {geoAssessment && (
+              <div className="bg-amber-50 border border-amber-100 rounded-xl p-3">
+                <span className="text-[10px] text-amber-700 uppercase font-bold tracking-wider block mb-1">
+                  Geo Orchestration
+                </span>
+                <p className="text-sm text-amber-800 font-extrabold">
+                  {geoAssessment.geoRiskLevel || "LOW"} Risk
+                </p>
+                <p className="text-[10px] text-amber-700 mt-1">
+                  {geoAssessment.distanceMeters != null
+                    ? `${geoAssessment.distanceMeters}m coordinate gap`
+                    : geoAssessment.verificationStatus || "Address checked"}
+                </p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {orchestration?.caseMatches?.length > 0 && (
+          <div className="bg-slate-50 border border-slate-100 rounded-xl p-3">
+            <span className="text-[10px] text-slate-500 uppercase font-bold tracking-wider block mb-2">
+              Report Patterns Used
+            </span>
+            <div className="space-y-1.5">
+              {orchestration.caseMatches.map((item) => (
+                <p key={item.id} className="text-[11px] text-slate-600 font-medium">
+                  {item.id}: {item.calculation}
+                </p>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Recommendation */}
         <div className="bg-blue-50 border border-blue-100 rounded-xl p-3">
