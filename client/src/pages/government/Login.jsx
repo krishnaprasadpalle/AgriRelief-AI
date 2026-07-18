@@ -47,13 +47,16 @@ const Login = () => {
       if (
         (identifier === "9876543210" && pwd === "password123") ||
         (identifier === "admin" && pwd === "admin") ||
-        (identifier === "officer" && pwd === "password123")
+        (identifier === "officer" && pwd === "password123") ||
+        (identifier === "AGR-TG-HYD-0001" && pwd === "password123") ||
+        (identifier === "AGR-AP-GNT-0005" && pwd === "password123")
       ) {
+        const isTg = identifier === "AGR-TG-HYD-0001" || identifier === "9876543210" || identifier === "officer";
         const officerUser = {
           username: identifier,
           role: "Government Officer",
-          name: "Dr. K. Prasad (District Officer)",
-          id: "OFF-8821",
+          name: isTg ? "Dr. K. Prasad (District Officer - Telangana)" : "Shri M. Venkateswarlu (District Officer - Andhra Pradesh)",
+          id: identifier.startsWith("AGR") ? identifier : "OFF-8821",
         };
         loginOfficer(officerUser, rememberMe);
         setIsLoading(false);
