@@ -1,8 +1,9 @@
+import { useNavigate } from "react-router-dom";
 import Button from "../common/Button";
 import hero from "../../assets/images/hero.png";
 
-
 const Hero = () => {
+    const navigate = useNavigate();
   return (
     <section className="bg-[#F8FAFC]">
 
@@ -40,12 +41,14 @@ const Hero = () => {
 
               <Button
                 text="Report Crop Damage"
-              />
+                onClick={() => navigate("/farmer/login")}
+                />
 
               <Button
                 text="Government Portal"
                 variant="secondary"
-              />
+                onClick={() => navigate("/government/login")}
+                />
 
             </div>
 

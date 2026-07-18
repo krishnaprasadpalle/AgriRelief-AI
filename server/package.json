@@ -1,0 +1,17 @@
+{
+  "name": "agrirelief-server",
+  "version": "1.0.0",
+  "description": "AgriRelief AI Backend - Crop Damage Analysis API",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch index.js"
+  },
+  "dependencies": {
+    "@google/generative-ai": "^0.24.1",
+    "cors": "^2.8.5",
+    "dotenv": "^17.4.2",
+    "express": "^4.21.2",
+    "multer": "^1.4.5-lts.1"
+  }
+}

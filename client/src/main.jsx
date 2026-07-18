@@ -4,11 +4,14 @@ import { BrowserRouter } from "react-router-dom";
 
 import "./index.css";
 import App from "./App";
+import { AnalysisProvider } from "./context/AnalysisContext";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     <BrowserRouter>
-      <App />
+      <AnalysisProvider>
+        <App />
+      </AnalysisProvider>
     </BrowserRouter>
   </StrictMode>
 );
