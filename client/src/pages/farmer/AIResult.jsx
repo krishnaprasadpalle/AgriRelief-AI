@@ -176,6 +176,8 @@ const AIResult = () => {
     confidence,
     recommendation,
     reason,
+    indicators,
+    sdrfEligibility,
   } = analysis;
 
   const isInvalidEvidence = isAgricultureField === false;
@@ -225,6 +227,8 @@ const AIResult = () => {
             confidence,
             recommendation,
             reason,
+            indicators: indicators || null,
+            sdrfEligibility: sdrfEligibility || "NOT_ELIGIBLE",
           },
           timestamp: new Date().toISOString(),
           severity: severity || "Medium",

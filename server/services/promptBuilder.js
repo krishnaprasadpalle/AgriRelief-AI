@@ -58,15 +58,32 @@ ANALYSIS STEPS:
   "severity": "Unknown",
   "confidence": 99,
   "recommendation": null,
-  "reason": "The uploaded image is not an agricultural field."
+  "reason": "The uploaded image is not an agricultural field.",
+  "indicators": {
+    "standingWater": false,
+    "siltDeposit": false,
+    "lodging": false,
+    "rottingDecay": false
+  },
+  "sdrfEligibility": "NOT_ELIGIBLE"
 }
 3. If it IS an agricultural field:
    a. Detect the crop. Supported crops: Paddy, Cotton, Groundnut, Sugarcane, Maize, Chilli, Unknown.
    b. Detect damage. Supported damage: Flood, Drought, Cyclone, Pest, Disease, Healthy Crop, Unknown.
-   c. Estimate the percentage of visible area affected (0-100).
-   d. Estimate severity: Low, Medium, High, Critical.
-   e. Estimate your confidence in this analysis (0-100).
-   f. Generate a professional recommendation for relief/remediation.
+   c. Check for physical flood / disaster indicators:
+      - standingWater (boolean): is there standing water or flooding in the field?
+      - siltDeposit (boolean): are leaves/crops coated with mud or silt?
+      - lodging (boolean): are crop stems flattened or bent?
+      - rottingDecay (boolean): are crops showing visible signs of decay or rot due to flooding/excess water?
+   d. Estimate the percentage of visible area affected (0-100).
+   e. Set the sdrfEligibility category based on the estimated damage percentage:
+      - "NOT_ELIGIBLE" (under 33% damage)
+      - "ELIGIBLE_MODERATE" (33% to 50% damage)
+      - "ELIGIBLE_SEVERE" (51% to 75% damage)
+      - "ELIGIBLE_TOTAL_LOSS" (above 75% damage)
+   f. Estimate severity: Low, Medium, High, Critical.
+   g. Estimate your confidence in this analysis (0-100).
+   h. Generate a professional recommendation for relief/remediation (e.g. fungicide spray, drain field, re-sowing).
 
 STRICT JSON OUTPUT FORMAT (Example for valid image):
 {
@@ -78,8 +95,15 @@ STRICT JSON OUTPUT FORMAT (Example for valid image):
   "affectedPercentage": 72,
   "severity": "High",
   "confidence": 91,
-  "recommendation": "Immediate inspection recommended.",
-  "reason": null
+  "recommendation": "Drain standing water immediately. Apply copper-based fungicide to prevent root rot. Eligible for SDRF relief fund.",
+  "reason": null,
+  "indicators": {
+    "standingWater": true,
+    "siltDeposit": true,
+    "lodging": false,
+    "rottingDecay": true
+  },
+  "sdrfEligibility": "ELIGIBLE_SEVERE"
 }
 
 Generate the JSON response now:`;
@@ -88,3 +112,4 @@ Generate the JSON response now:`;
 module.exports = {
   buildAnalysisPrompt,
 };
+

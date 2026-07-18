@@ -51,6 +51,8 @@ const validateResponse = (responseText) => {
     "confidence",
     "recommendation",
     "reason",
+    "indicators",
+    "sdrfEligibility",
   ];
 
   const missingFields = requiredFields.filter((field) => !(field in data));
@@ -67,6 +69,23 @@ const validateResponse = (responseText) => {
   }
   if (typeof data.damageDetected !== "boolean") {
     throw new Error("damageDetected must be a boolean.");
+  }
+
+  // Validate sdrfEligibility enum
+  const allowedSdrfStatuses = ["NOT_ELIGIBLE", "ELIGIBLE_MODERATE", "ELIGIBLE_SEVERE", "ELIGIBLE_TOTAL_LOSS"];
+  if (!allowedSdrfStatuses.includes(data.sdrfEligibility)) {
+    throw new Error(`Invalid sdrfEligibility value: "${data.sdrfEligibility}". Must be one of: ${allowedSdrfStatuses.join(", ")}`);
+  }
+
+  // Validate indicators object
+  if (typeof data.indicators !== "object" || data.indicators === null) {
+    throw new Error("indicators must be an object.");
+  }
+  const requiredIndicators = ["standingWater", "siltDeposit", "lodging", "rottingDecay"];
+  for (const key of requiredIndicators) {
+    if (!(key in data.indicators) || typeof data.indicators[key] !== "boolean") {
+      throw new Error(`indicators.${key} must be a boolean.`);
+    }
   }
 
   // Confidence constraints
