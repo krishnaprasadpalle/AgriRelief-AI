@@ -5,6 +5,22 @@ const DecisionPanel = ({ claim, onDecision }) => {
   const [error, setError] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
 
+  const calculateFallbackAmount = () => {
+    const rates = {
+      Paddy: 17000,
+      Cotton: 8500,
+      Groundnut: 8500,
+      Sugarcane: 22500,
+      Maize: 8500,
+      Chilli: 17000,
+    };
+    const area = Number(claim.area || 0);
+    const affectedPercentage = Number(claim.aiAnalysis?.affectedPercentage || 45);
+    const rate = rates[claim.crop] || 8500;
+    if (affectedPercentage < 33) return 0;
+    return Math.round(area * 0.404686 * (affectedPercentage / 100) * rate);
+  };
+
   const handleAction = (action) => {
     if (!remarks.trim()) {
       setError("Officer remarks are mandatory before making a decision.");
@@ -16,6 +32,10 @@ const DecisionPanel = ({ claim, onDecision }) => {
     // Simulate a brief processing delay
     setTimeout(() => {
       let updates = {};
+      const estimatedAmount =
+        Number(claim.aiAnalysis?.costEstimation?.estimatedAmount) ||
+        Number(claim.estimatedAmount) ||
+        calculateFallbackAmount();
 
       switch (action) {
         case "Approved":
@@ -24,6 +44,8 @@ const DecisionPanel = ({ claim, onDecision }) => {
             approvedAt: new Date().toISOString(),
             approvedBy: "Government Officer",
             remarks: remarks.trim(),
+            sanctionedAmount: estimatedAmount,
+            sanctionedCurrency: "INR",
           };
           break;
         case "Rejected":
@@ -32,6 +54,7 @@ const DecisionPanel = ({ claim, onDecision }) => {
             rejectedAt: new Date().toISOString(),
             rejectedBy: "Government Officer",
             remarks: remarks.trim(),
+            hiddenFromFarmer: true,
           };
           break;
         case "Field Inspection Required":
@@ -91,6 +114,16 @@ const DecisionPanel = ({ claim, onDecision }) => {
               </span>
               <p className="text-sm text-slate-700 bg-slate-50 border border-slate-100 rounded-lg p-3 leading-relaxed">
                 {claim.remarks}
+              </p>
+            </div>
+          )}
+          {claim.status === "Approved" && (
+            <div className="bg-green-50 border border-green-100 rounded-lg p-3">
+              <span className="text-xs font-bold text-green-700 uppercase block mb-1">
+                Sanctioned Amount
+              </span>
+              <p className="text-lg font-extrabold text-green-800">
+                Rs. {Number(claim.sanctionedAmount || claim.aiAnalysis?.costEstimation?.estimatedAmount || 0).toLocaleString("en-IN")}
               </p>
             </div>
           )}

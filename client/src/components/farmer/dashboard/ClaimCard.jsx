@@ -86,6 +86,17 @@ const ClaimCard = ({ claim }) => {
           </span>
         )}
       </div>
+
+      {claim.status === "Approved" && (
+        <div className="mt-3 bg-green-50 border border-green-100 rounded-lg px-3 py-2">
+          <span className="text-[10px] text-green-700 uppercase font-bold tracking-wide block">
+            Sanctioned Amount
+          </span>
+          <span className="text-base font-extrabold text-green-800">
+            Rs. {Number(claim.sanctionedAmount || claim.estimatedAmount || claim.aiAnalysis?.costEstimation?.estimatedAmount || 0).toLocaleString("en-IN")}
+          </span>
+        </div>
+      )}
     </div>
   );
 };

@@ -10,6 +10,8 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const [farmer, setFarmer] = useState(null);
   const [claims, setClaims] = useState([]);
+  const [notifications, setNotifications] = useState([]);
+  const [popupNotification, setPopupNotification] = useState(null);
 
   useEffect(() => {
     const activeFarmer = getLoggedInFarmer();
@@ -22,7 +24,22 @@ const Dashboard = () => {
     // Load claims from localStorage
     const allClaims = JSON.parse(localStorage.getItem("claims")) || [];
     // Filter claims by loggedIn farmer ID
-    const farmerClaims = allClaims.filter((c) => c.farmerId === activeFarmer.id);
+    const farmerClaims = allClaims.filter(
+      (c) => c.farmerId === activeFarmer.id && c.status !== "Rejected" && !c.hiddenFromFarmer
+    );
+
+    const storedNotifications = JSON.parse(localStorage.getItem("farmerNotifications")) || [];
+    const farmerNotifications = storedNotifications
+      .filter((n) => n.farmerId === activeFarmer.id)
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    setNotifications(farmerNotifications);
+
+    const unreadRejection = farmerNotifications.find(
+      (n) => n.category === "Rejected" && !n.read
+    );
+    if (unreadRejection) {
+      setPopupNotification(unreadRejection);
+    }
 
     // Fallback dummy data if no claims are present
     if (farmerClaims.length === 0) {
@@ -67,7 +84,7 @@ const Dashboard = () => {
     navigate("/farmer/report");
   };
 
-  const notifications = [
+  const defaultNotifications = [
     {
       id: 1,
       category: "Urgent",
@@ -90,6 +107,19 @@ const Dashboard = () => {
       date: "1 week ago",
     },
   ];
+
+  const handleClosePopup = () => {
+    if (!popupNotification) return;
+    const allNotifications = JSON.parse(localStorage.getItem("farmerNotifications")) || [];
+    const updated = allNotifications.map((item) =>
+      item.id === popupNotification.id ? { ...item, read: true } : item
+    );
+    localStorage.setItem("farmerNotifications", JSON.stringify(updated));
+    setNotifications((prev) =>
+      prev.map((item) => (item.id === popupNotification.id ? { ...item, read: true } : item))
+    );
+    setPopupNotification(null);
+  };
 
   if (!farmer) {
     return (
@@ -123,6 +153,28 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 px-4 py-6 sm:py-8">
+      {popupNotification && (
+        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center px-4">
+          <div className="bg-white rounded-2xl shadow-xl border border-red-100 max-w-sm w-full p-6">
+            <span className="text-[10px] text-red-600 uppercase font-extrabold tracking-wide">
+              Claim Rejected
+            </span>
+            <h3 className="text-lg font-extrabold text-slate-900 mt-2">
+              Your ticket got rejected because of these reasons.
+            </h3>
+            <p className="text-sm text-slate-600 mt-3 leading-relaxed">
+              {popupNotification.description}
+            </p>
+            <button
+              type="button"
+              onClick={handleClosePopup}
+              className="w-full mt-5 bg-red-600 hover:bg-red-700 text-white rounded-xl py-3 font-bold cursor-pointer transition"
+            >
+              Okay
+            </button>
+          </div>
+        </div>
+      )}
       <div className="max-w-2xl mx-auto flex flex-col min-h-[90vh] justify-between">
         
         <div>
@@ -165,7 +217,7 @@ const Dashboard = () => {
               📢 Government Notifications
             </h2>
             <div className="space-y-3">
-              {notifications.map((notif) => (
+              {[...notifications, ...defaultNotifications].map((notif) => (
                 <NotificationCard key={notif.id} notification={notif} />
               ))}
             </div>

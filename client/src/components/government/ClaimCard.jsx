@@ -2,6 +2,26 @@ import React from "react";
 import ClaimStatusBadge from "./ClaimStatusBadge";
 
 const ClaimCard = ({ claim, farmerName, onView }) => {
+  const savedAmount = Number(
+    claim.sanctionedAmount ||
+      claim.estimatedAmount ||
+      claim.aiAnalysis?.costEstimation?.estimatedAmount ||
+      0
+  );
+  const rates = {
+    Paddy: 17000,
+    Cotton: 8500,
+    Groundnut: 8500,
+    Sugarcane: 22500,
+    Maize: 8500,
+    Chilli: 17000,
+  };
+  const affectedPercentage = Number(claim.aiAnalysis?.affectedPercentage || 45);
+  const amount =
+    savedAmount > 0 || affectedPercentage < 33
+      ? savedAmount
+      : Math.round(Number(claim.area || 0) * 0.404686 * (affectedPercentage / 100) * (rates[claim.crop] || 8500));
+
   const formatDate = (dateStr) => {
     if (!dateStr) return "—";
     return new Date(dateStr).toLocaleDateString("en-IN", {
@@ -62,6 +82,14 @@ const ClaimCard = ({ claim, farmerName, onView }) => {
             }`}
           >
             {claim.severity || "N/A"}
+          </span>
+        </div>
+        <div className="col-span-2 bg-emerald-50 border border-emerald-100 rounded-lg px-3 py-2">
+          <span className="text-emerald-700 text-[10px] block font-bold uppercase">
+            Estimated / Sanctioned Amount
+          </span>
+          <span className="font-extrabold text-emerald-800 text-sm">
+            Rs. {amount.toLocaleString("en-IN")}
           </span>
         </div>
       </div>

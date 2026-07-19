@@ -2,6 +2,29 @@ import React from "react";
 import ClaimStatusBadge from "./ClaimStatusBadge";
 
 const ClaimTable = ({ claims, farmersMap, onView }) => {
+  const getAmount = (claim) => {
+    const savedAmount = Number(
+      claim.sanctionedAmount ||
+        claim.estimatedAmount ||
+        claim.aiAnalysis?.costEstimation?.estimatedAmount ||
+        0
+    );
+    if (savedAmount > 0) return savedAmount;
+
+    const rates = {
+      Paddy: 17000,
+      Cotton: 8500,
+      Groundnut: 8500,
+      Sugarcane: 22500,
+      Maize: 8500,
+      Chilli: 17000,
+    };
+    const area = Number(claim.area || 0);
+    const affectedPercentage = Number(claim.aiAnalysis?.affectedPercentage || 45);
+    if (affectedPercentage < 33) return 0;
+    return Math.round(area * 0.404686 * (affectedPercentage / 100) * (rates[claim.crop] || 8500));
+  };
+
   const formatDate = (dateStr) => {
     if (!dateStr) return "—";
     return new Date(dateStr).toLocaleDateString("en-IN", {
@@ -36,6 +59,9 @@ const ClaimTable = ({ claims, farmersMap, onView }) => {
             </th>
             <th className="px-4 py-3 text-[10px] font-bold text-gray-400 uppercase tracking-wider">
               Severity
+            </th>
+            <th className="px-4 py-3 text-[10px] font-bold text-gray-400 uppercase tracking-wider">
+              Amount
             </th>
             <th className="px-4 py-3 text-[10px] font-bold text-gray-400 uppercase tracking-wider">
               Status
@@ -79,6 +105,9 @@ const ClaimTable = ({ claims, farmersMap, onView }) => {
                 >
                   {claim.severity || "—"}
                 </span>
+              </td>
+              <td className="px-4 py-3 text-xs font-extrabold text-emerald-700">
+                Rs. {getAmount(claim).toLocaleString("en-IN")}
               </td>
               <td className="px-4 py-3">
                 <ClaimStatusBadge status={claim.status} />

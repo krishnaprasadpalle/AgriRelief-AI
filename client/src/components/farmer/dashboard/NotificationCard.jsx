@@ -1,12 +1,26 @@
 import React from "react";
 
 const NotificationCard = ({ notification }) => {
+  const displayDate = notification.date || (notification.createdAt
+    ? new Date(notification.createdAt).toLocaleDateString("en-IN", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+      })
+    : "");
+
   const getBadgeStyle = (category) => {
     switch (category) {
       case "Urgent":
         return "bg-red-100 text-red-700 border-red-200";
       case "Scheme":
         return "bg-green-100 text-green-700 border-green-200";
+      case "Approved":
+        return "bg-green-100 text-green-700 border-green-200";
+      case "Rejected":
+        return "bg-red-100 text-red-700 border-red-200";
+      case "Inspection":
+        return "bg-amber-100 text-amber-700 border-amber-200";
       default:
         return "bg-blue-100 text-blue-700 border-blue-200";
     }
@@ -19,7 +33,7 @@ const NotificationCard = ({ notification }) => {
           <span className={`text-[10px] uppercase tracking-wider font-extrabold px-2 py-0.5 rounded border ${getBadgeStyle(notification.category)}`}>
             {notification.category}
           </span>
-          <span className="text-[10px] text-gray-400 font-semibold">{notification.date}</span>
+          <span className="text-[10px] text-gray-400 font-semibold">{displayDate}</span>
         </div>
         <h4 className="text-sm font-semibold text-slate-800 leading-snug">
           {notification.message}

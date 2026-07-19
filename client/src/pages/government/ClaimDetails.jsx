@@ -41,6 +41,7 @@ const ClaimDetails = () => {
   // ── Decision Callback ──────────────────────────────────────────────────────
   const handleDecision = (claimId, updates) => {
     const allClaims = JSON.parse(localStorage.getItem("claims")) || [];
+    const targetClaim = allClaims.find((c) => c.claimId === claimId) || claim;
     const updatedClaims = allClaims.map((c) => {
       if (c.claimId === claimId) {
         return {
@@ -52,6 +53,39 @@ const ClaimDetails = () => {
     });
 
     localStorage.setItem("claims", JSON.stringify(updatedClaims));
+
+    const notifications = JSON.parse(localStorage.getItem("farmerNotifications")) || [];
+    const amount = Number(
+      updates.sanctionedAmount ||
+        targetClaim?.sanctionedAmount ||
+        targetClaim?.aiAnalysis?.costEstimation?.estimatedAmount ||
+        0
+    );
+    const notification = {
+      id: `${claimId}-${updates.status}-${Date.now()}`,
+      farmerId: targetClaim?.farmerId,
+      claimId,
+      category:
+        updates.status === "Approved"
+          ? "Approved"
+          : updates.status === "Rejected"
+          ? "Rejected"
+          : "Inspection",
+      message:
+        updates.status === "Approved"
+          ? `Your claim ${claimId} was approved.`
+          : updates.status === "Rejected"
+          ? `Your ticket got rejected because of these reasons.`
+          : `Your claim ${claimId} needs field inspection.`,
+      description:
+        updates.status === "Approved"
+          ? `Sanctioned amount: Rs. ${amount.toLocaleString("en-IN")}. Officer remarks: ${updates.remarks}`
+          : `Claim ${claimId}: ${updates.remarks}`,
+      sanctionedAmount: updates.status === "Approved" ? amount : null,
+      read: false,
+      createdAt: new Date().toISOString(),
+    };
+    localStorage.setItem("farmerNotifications", JSON.stringify([notification, ...notifications]));
     
     // Update local state to reflect changes immediately
     setClaim((prev) => ({

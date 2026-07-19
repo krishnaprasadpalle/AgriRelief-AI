@@ -99,7 +99,29 @@ const AIAnalysisCard = ({ claim }) => {
   const reason = ai.reason || null;
   const sdrfEligibility = ai.sdrfEligibility || "ELIGIBLE_MODERATE"; // default fallback for older records
   const priority = ai.priority || claim.priority || (severity === "Critical" || severity === "High" ? "Immediate" : "Standard");
-  const costEstimation = ai.costEstimation || null;
+  const buildFallbackCost = () => {
+    const cropRates = {
+      Paddy: { category: "irrigated", rate: 17000 },
+      Cotton: { category: "rainfed", rate: 8500 },
+      Groundnut: { category: "rainfed", rate: 8500 },
+      Sugarcane: { category: "perennial", rate: 22500 },
+      Maize: { category: "rainfed", rate: 8500 },
+      Chilli: { category: "irrigated", rate: 17000 },
+    };
+    const area = Number(claim.area || 0);
+    const affected = Number(ai.affectedPercentage || 45);
+    const cropRate = cropRates[cropType] || { category: "rainfed", rate: 8500 };
+    const eligibleAreaHectares = area * 0.404686 * (affected / 100);
+    return {
+      estimatedAmount: affected < 33 ? 0 : Math.round(eligibleAreaHectares * cropRate.rate),
+      claimedAreaAcres: area,
+      eligibleAreaHectares: Number(eligibleAreaHectares.toFixed(3)),
+      ratePerHectare: cropRate.rate,
+      cropCategory: cropRate.category,
+      payoutStatus: affected < 33 ? "NOT_ELIGIBLE" : "ESTIMATED",
+    };
+  };
+  const costEstimation = ai.costEstimation || buildFallbackCost();
   const geoAssessment = ai.geoAssessment || null;
   const orchestration = ai.orchestration || null;
   const indicators = ai.indicators || {

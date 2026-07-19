@@ -19,7 +19,17 @@
 const { analyzeImageWithGemini } = require("../services/geminiVisionService");
 
 // Allowed MIME types
-const ALLOWED_MIME_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+const ALLOWED_MIME_TYPES = [
+  "image/jpeg",
+  "image/jpg",
+  "image/png",
+  "image/webp",
+  "image/heic",
+  "image/heif",
+  "image/gif",
+  "image/bmp",
+  "image/tiff",
+];
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
 /**
@@ -41,7 +51,7 @@ const analyzeHandler = async (req, res, next) => {
     if (!ALLOWED_MIME_TYPES.includes(mimetype)) {
       return res.status(400).json({
         success: false,
-        message: "Invalid image format. Supported formats: JPEG, PNG, WebP.",
+        message: "Invalid image format. Supported formats: JPEG, JPG, PNG, WebP, HEIC, HEIF, GIF, BMP, TIFF.",
       });
     }
 
